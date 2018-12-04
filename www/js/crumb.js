@@ -82,7 +82,7 @@ function UpdateMinAndCurrentLocation(){
 			closetLon = parseFloat(splited[1]);
 			closesDescription = splited[2];
 			UpdateNextDestination(0);
-			$("h1").text(closesDescription +"at"+closestDist+"m");
+			$("#NextText").text(closesDescription +"at"+closestDist+"m");
 		}
 	}
 }
@@ -145,7 +145,7 @@ function watchPosition() {
       currentLat = position.coords.latitude;
 	  currentLon = position.coords.longitude;
 	  UpdateMinAndCurrentLocation()
-	  alert(currentLat);
+	  
 	  
    };
 
@@ -197,10 +197,11 @@ document.getElementById('arrow').addEventListener('touchcancel',imgMouseOut,fals
 	watchPosition();
 	
 function processEvent(event) {
-	var currentAngle = Math.round(event.alpha);
-	var Degree = (nextHeading-currentAngle-90)+"deg";
+	var currentAngle = Math.round(event.alpha)-180;
+	
+	var Degree = (currentAngle-90+nextHeading)+"deg";
 	$("#arrow").css("transform","rotate("+Degree+")");
-	    
+	  
 };
 window.addEventListener("deviceorientation",processEvent, true);
 
