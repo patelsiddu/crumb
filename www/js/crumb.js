@@ -50,7 +50,7 @@ function UpdateMinAndCurrentLocation(){
 	var lat = currentLat;
 	var lon = currentLon;
 	var combined = [];
-	var description = "";
+	
     var len = localStorage.length;
 	var indices = [];
 	
@@ -60,6 +60,7 @@ function UpdateMinAndCurrentLocation(){
 	}else{
 		if(len >0)
 		{
+			
 			for ( var i = 0; i < len; i++ ) {
 				indices.push(i);
 			    var a = localStorage.getItem(localStorage.key(i));
@@ -69,6 +70,7 @@ function UpdateMinAndCurrentLocation(){
 				var temp_lonA = parseFloat(splitedA[1]);
 				var disA = dist([lat,lon],[temp_latA,temp_lonA]);
 				list_of_dist.push(disA);
+				alert('disA = ' + disA);
 			}
 			indices.sort(function(a,b)
 			{
@@ -80,11 +82,12 @@ function UpdateMinAndCurrentLocation(){
 			
 			closetLat = parseFloat(splited[0]);
 			closetLon = parseFloat(splited[1]);
-			closesDescription = splited[2];
+			description = splited[2];
 			UpdateNextDestination(0);
-			$("#NextText").text(closesDescription +"at"+closestDist+"m");
+			
 		}
 	}
+	
 }
 
 
@@ -96,14 +99,20 @@ function UpdateNextDestination(index)
 		if(list_of_dist[index]>minDist){
 			nextDist = closestDist;
 			nextHeading = bearing([currentLat,currentLon],[closestLat,closestLon]);
+			$("#NextText").text(closesDescription +"at"+closestDist+"m");
+		}else{
+			UpdateNextDestination(index+1,callback)
 		}
-		return;
-	}else{
-		UpdateNextDestination(index+1)
+	 
 	}
+	
+	
 }
-function saveLocation(coord){	
+function saveLocation(){	
 	var len = localStorage.length;
+	
+	var lat = currentLat;
+	var lon = currentLon;
 	if (closestDist>minDist)
 	{
 		localStorage.setItem(""+len,lat+"/"+lon+"/" + description);
@@ -111,9 +120,10 @@ function saveLocation(coord){
 	{
 		localStorage.setItem(""+closestIndex,currentLat+"/"+currentLon+"/" + closesDescription);
 	}
+    
 }
 
-function getPosition() {
+function getPosition(callback) {
    var options = {
       enableHighAccuracy: true,
       maximumAge: 3600000
@@ -123,7 +133,8 @@ function getPosition() {
    function onSuccess(position) {
       currentLat = position.coords.latitude;
 	  currentLon = position.coords.longitude;
-	   
+	  
+	  callback();
     }
       
   
@@ -133,7 +144,7 @@ function getPosition() {
    }
 }
 
-function watchPosition() {
+function watchPosition(callback) {
    var options = {
       maximumAge: 3600000,
       timeout: 3000,
@@ -144,8 +155,8 @@ function watchPosition() {
    function onSuccess(position) {
       currentLat = position.coords.latitude;
 	  currentLon = position.coords.longitude;
-	  UpdateMinAndCurrentLocation()
 	  
+	  callback();
 	  
    };
 
@@ -153,23 +164,9 @@ function watchPosition() {
       alert('code: '    + error.code    + '\n' +'message: ' + error.message + '\n');
    }
 }
-function imgMouseDown()
-{
 
-	document.getElementById('arrow').width = ""+ (w*0.95);
-	document.getElementById('arrow').height = "" +(h*0.95);
-}
-function imgMouseUp()
-{
 
-	document.getElementById('arrow').width = ""+ (w);
-	document.getElementById('arrow').height = "" +(h);
-}
-function imgMouseOut()
-{
-	document.getElementById('arrow').width = ""+ (w);
-	document.getElementById('arrow').height = "" +(h);
-}
+
 	
 var currentLat = 0;
 var currentLon = 0;
@@ -182,19 +179,20 @@ var closesDescription = "";
 var nextDist=0;
 var nextHeading = 0;
 var list_of_dist = [];
+var description = "";
 var w;
 var h;
 $(document).ready(function(){
 w = parseInt(document.getElementById('arrow').width);
 h = parseInt(document.getElementById('arrow').height); 
-document.getElementById('arrow').addEventListener('touchstart',imgMouseDown,false);	
-document.getElementById('arrow').addEventListener('touchend',imgMouseUp,false);	
-document.getElementById('arrow').addEventListener('touchcancel',imgMouseOut,false);	
- document.body.addEventListener('touchmove', function(e) {
-                    e.preventDefault();
-                }, false);
+$("#arrow").click(function(){
+	localStorage.clear();
+    //alert("storage was cleared and the length is" + localStorage.length);
+	getPosition(saveLocation);
+});
 
-	watchPosition();
+
+watchPosition(UpdateMinAndCurrentLocation);
 	
 function processEvent(event) {
 	var currentAngle = Math.round(event.alpha)-180;
