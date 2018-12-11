@@ -1,6 +1,30 @@
+var currentLat = 0;
+var currentLon = 0;
+var minDist = 20;
+
+var nextDist=0;
+var nextHeading = 0;
+var list_of_dist = [];
+
+var indices = [];
+
+
 function toRadians(degrees) {
   return degrees * Math.PI / 180;
 };
+function getStorageLength(){
+	if("len" in localStorage){
+		return parseInt(localStorage.getItem("len"));
+	} else {
+		
+		return 0
+	}
+}
+function setStorageLength(length){
+	
+		localStorage.setItem("len",""+length);
+	
+}
 // Converts from radians to degrees.
 function toDegrees(radians) {
   return radians * 180 / Math.PI;
@@ -24,7 +48,7 @@ function dist(coords1, coords2) {
     Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c;
+  var d = 1000*R * c;
 
 
 
@@ -50,11 +74,12 @@ function UpdateMinAndCurrentLocation(){
 	var lat = currentLat;
 	var lon = currentLon;
 	var combined = [];
+	list_of_dist = [];
 	
-    var len = localStorage.length;
-	var indices = [];
+    var len = getStorageLength();
 	
-	 
+	indices = [];
+
 	if(lat==0||lon ==0){
 		return;
 	}else{
@@ -63,26 +88,26 @@ function UpdateMinAndCurrentLocation(){
 			
 			for ( var i = 0; i < len; i++ ) {
 				indices.push(i);
-			    var a = localStorage.getItem(localStorage.key(i));
-				combined.push(a);
+			    var a = localStorage.getItem("location"+(i+1));
+				
 				var splitedA = a.split("/");
 				var temp_latA = parseFloat(splitedA[0]);
 				var temp_lonA = parseFloat(splitedA[1]);
 				var disA = dist([lat,lon],[temp_latA,temp_lonA]);
+				
 				list_of_dist.push(disA);
-				alert('disA = ' + disA);
+				
 			}
+			
 			indices.sort(function(a,b)
 			{
 				return list_of_dist[a] - list_of_dist[b] 
 			});
-			closestIndex = indices[0];
-			closestDist = list_of_dist[closestIndex];
-			var splited = combined[closestIndex];
+				
 			
-			closetLat = parseFloat(splited[0]);
-			closetLon = parseFloat(splited[1]);
-			description = splited[2];
+			
+			
+			
 			UpdateNextDestination(0);
 			
 		}
@@ -90,35 +115,57 @@ function UpdateMinAndCurrentLocation(){
 	
 }
 
-
-
-function UpdateNextDestination(index)
-{
-	if(index<=localStorage.length)
-	{
-		if(list_of_dist[index]>minDist){
-			nextDist = closestDist;
+function UpdateNextDestination(index){
+	var temp_lat = 0;
+	var temp_lon = 0;
+	var temp_dist = 0;
+	if("nextLat" in sessionStorage){
+		temp_lat = parseFloat(SessionStorage.getItem("nextLat"));
+		temp_lat = parseFloat(SessionStorage.getItem("nextLon"));
+		nextHeading = bearing([currentLat,currentLon],[temp_Lat,temp_Lon]);
+		temp_dist =  dist([currentLat,currentLon],[temp_Lat,temp_Lon]);
+		if (temp_dist<minDist){
+			$("#NextText").text("you have reached your destination");
+			sessionStorage.clear();
+		}else {
+			nextDist = temp_dist;
+		}
+	}else if(index<getStorageLength())
+	{	var a = localStorage.getItem("location"+(indices[index]+1));
+		var splitedA = a.split("/");
+		if(list_of_dist[indices[index]]>minDist){
+			
+			var closestLat =  parseFloat(splitedA[0]);
+			var closestLon =  parseFloat(splitedA[1]);
 			nextHeading = bearing([currentLat,currentLon],[closestLat,closestLon]);
-			$("#NextText").text(closesDescription +"at"+closestDist+"m");
+			
+			$("#NextText").html(splitedA[2] +" at "+list_of_dist[index]+"m");
 		}else{
-			UpdateNextDestination(index+1,callback)
+			
+			$("#curLocText").text("You are at:" + splitedA[2]);
+			UpdateNextDestination(index+1)
 		}
 	 
 	}
 	
 	
 }
+
 function saveLocation(){	
-	var len = localStorage.length;
+	
+	
+	var len = getStorageLength();
 	
 	var lat = currentLat;
 	var lon = currentLon;
-	if (closestDist>minDist)
+	if (list_of_dist[indices[0]]>minDist || len==0)
 	{
-		localStorage.setItem(""+len,lat+"/"+lon+"/" + description);
+		localStorage.setItem("location"+(len+1),lat+"/"+lon+"/" + description);
+		setStorageLength(len+1);
 	}else
 	{
-		localStorage.setItem(""+closestIndex,currentLat+"/"+currentLon+"/" + closesDescription);
+				
+		localStorage.setItem("location"+(indices[0]+1),currentLat+"/"+currentLon+"/" + closesDescription);
 	}
     
 }
@@ -153,8 +200,12 @@ function watchPosition(callback) {
    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, options);
 
    function onSuccess(position) {
-      currentLat = position.coords.latitude;
-	  currentLon = position.coords.longitude;
+      //currentLat = position.coords.latitude;
+	  //currentLon = position.coords.longitude;
+	  currentLat = 43.642613;
+	  currentLon = -79.387059;
+	
+	  
 	  
 	  callback();
 	  
@@ -166,29 +217,36 @@ function watchPosition(callback) {
 }
 
 
-
-	
-var currentLat = 0;
-var currentLon = 0;
-var minDist = 20;
-var closestLon = 0;
-var closestLat = 0 ;
-var closestDist = 0;
-var closestIndex = 0;
-var closesDescription = "";
-var nextDist=0;
-var nextHeading = 0;
-var list_of_dist = [];
-var description = "";
-var w;
-var h;
 $(document).ready(function(){
-w = parseInt(document.getElementById('arrow').width);
-h = parseInt(document.getElementById('arrow').height); 
+
+localStorage.clear();
 $("#arrow").click(function(){
-	localStorage.clear();
-    //alert("storage was cleared and the length is" + localStorage.length);
-	getPosition(saveLocation);
+	
+    localStorage.setItem("location1",43.642613+"/"+(-79.387059)+"/" + "CN tower");
+	setStorageLength(1);
+	
+	
+	
+	
+	localStorage.setItem("location2",43.743407+"/"+(-79.582001)+"/" + "kipling");
+	setStorageLength(2);
+	
+	v = $("#desBox").val();
+	alert(v);
+	//alert("storage was cleared and the length is" + localStorage.length);
+	//getPosition(saveLocation);
+	
+});
+$(function() {
+  $("#main").swipe( {
+    //Generic swipe handler for all directions
+    swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
+     if(direction=="up"){
+		window.location = "table.html"
+	 }
+	 
+    }
+  });
 });
 
 

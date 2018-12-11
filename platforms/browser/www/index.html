@@ -41,20 +41,29 @@
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
 	<link rel="stylesheet" type="text/css" href="css/crumb.css"
 	
-    <title>Hello World</title>
 
+<title>Crumbz</title>
 </head>
 
 <body>
+
     <div id = "main" class="app">
-        <h1>PhoneGap</h1>
+        <h1 id="NextText">Press the button to save</h1>
+		<h1 id="curLocText"></h1>
+		<div>
 		<img id="arrow" src="img/arrow-button.png">
-        <input type="image" name="<Name of the image button >" src=""img/arrow-button.png""  alt="text">
-		<div id="deviceready" class="blink">
-            <p class="event listening">Connecting to Device</p>
-            <p class="event received">Device is Ready</p>
         </div>
+		<div>
+		<form>
+			
+			<input type="text" name="firstname">
+			<br>
+			
+			<input type="text" name="lastname">
+		</form>
+		</div>
     </div>
+	
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script type="text/javascript">
@@ -62,6 +71,7 @@
     </script>
 	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
+	<script type="text/javascript" src="js/jquery.touchSwipe.min.js"></script>
 	<script src="js/crumb.js"></script>
 </body>
 

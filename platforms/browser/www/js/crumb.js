@@ -1,6 +1,30 @@
+var currentLat = 0;
+var currentLon = 0;
+var minDist = 20;
+
+var nextDist=0;
+var nextHeading = 0;
+var list_of_dist = [];
+
+var indices = [];
+
+
 function toRadians(degrees) {
   return degrees * Math.PI / 180;
 };
+function getStorageLength(){
+	if("len" in localStorage){
+		return parseInt(localStorage.getItem("len"));
+	} else {
+		
+		return 0
+	}
+}
+function setStorageLength(length){
+	
+		localStorage.setItem("len",""+length);
+	
+}
 // Converts from radians to degrees.
 function toDegrees(radians) {
   return radians * 180 / Math.PI;
@@ -24,7 +48,7 @@ function dist(coords1, coords2) {
     Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c;
+  var d = 1000*R * c;
 
 
 
@@ -50,70 +74,103 @@ function UpdateMinAndCurrentLocation(){
 	var lat = currentLat;
 	var lon = currentLon;
 	var combined = [];
-	var description = "";
-    var len = localStorage.length;
-	var indices = [];
+	list_of_dist = [];
 	
-	 
+    var len = getStorageLength();
+	
+	indices = [];
+
 	if(lat==0||lon ==0){
 		return;
 	}else{
 		if(len >0)
 		{
+			
 			for ( var i = 0; i < len; i++ ) {
 				indices.push(i);
-			    var a = localStorage.getItem(localStorage.key(i));
-				combined.push(a);
+			    var a = localStorage.getItem("location"+(i+1));
+				
 				var splitedA = a.split("/");
 				var temp_latA = parseFloat(splitedA[0]);
 				var temp_lonA = parseFloat(splitedA[1]);
 				var disA = dist([lat,lon],[temp_latA,temp_lonA]);
+				
 				list_of_dist.push(disA);
+				
 			}
+			
 			indices.sort(function(a,b)
 			{
 				return list_of_dist[a] - list_of_dist[b] 
 			});
-			closestIndex = indices[0];
-			closestDist = list_of_dist[closestIndex];
-			var splited = combined[closestIndex];
+				
 			
-			closetLat = parseFloat(splited[0]);
-			closetLon = parseFloat(splited[1]);
-			closesDescription = splited[2];
+			
+			
+			
 			UpdateNextDestination(0);
-			$("h1").text("nex");
+			
 		}
 	}
+	
 }
 
-
-
-function UpdateNextDestination(index)
-{
-	if(index<=localStorage.length)
-	{
-		if(list_of_dist[index]>minDist){
-			nextDist = closestDist;
+function UpdateNextDestination(index){
+	var temp_lat = 0;
+	var temp_lon = 0;
+	var temp_dist = 0;
+	if("nextLat" in sessionStorage){
+		temp_lat = parseFloat(SessionStorage.getItem("nextLat"));
+		temp_lat = parseFloat(SessionStorage.getItem("nextLon"));
+		nextHeading = bearing([currentLat,currentLon],[temp_Lat,temp_Lon]);
+		temp_dist =  dist([currentLat,currentLon],[temp_Lat,temp_Lon]);
+		if (temp_dist<minDist){
+			$("#NextText").text("you have reached your destination");
+			sessionStorage.clear();
+		}else {
+			nextDist = temp_dist;
+		}
+	}else if(index<getStorageLength())
+	{	var a = localStorage.getItem("location"+(indices[index]+1));
+		var splitedA = a.split("/");
+		if(list_of_dist[indices[index]]>minDist){
+			
+			var closestLat =  parseFloat(splitedA[0]);
+			var closestLon =  parseFloat(splitedA[1]);
 			nextHeading = bearing([currentLat,currentLon],[closestLat,closestLon]);
+			
+			$("#NextText").html(splitedA[2] +" at "+list_of_dist[index]+"m");
+		}else{
+			
+			$("#curLocText").text("You are at:" + splitedA[2]);
+			UpdateNextDestination(index+1)
 		}
-		return;
-	}else{
-		UpdateNextDestination(index+1)
+	 
 	}
+	
+	
 }
-function saveLocation(coord){	
-	var len = localStorage.length;
-	if (closestDist>minDist)
+
+function saveLocation(){	
+	
+	
+	var len = getStorageLength();
+	
+	var lat = currentLat;
+	var lon = currentLon;
+	if (list_of_dist[indices[0]]>minDist || len==0)
 	{
-		localStorage.setItem(""+len,lat+"/"+lon+"/" + description);
+		localStorage.setItem("location"+(len+1),lat+"/"+lon+"/" + description);
+		setStorageLength(len+1);
 	}else
 	{
-		localStorage.setItem(""+closestIndex,currentLat+"/"+currentLon+"/" + closesDescription);
+				
+		localStorage.setItem("location"+(indices[0]+1),currentLat+"/"+currentLon+"/" + closesDescription);
 	}
+    
 }
 
-function getPosition() {
+function getPosition(callback) {
    var options = {
       enableHighAccuracy: true,
       maximumAge: 3600000
@@ -123,15 +180,18 @@ function getPosition() {
    function onSuccess(position) {
       currentLat = position.coords.latitude;
 	  currentLon = position.coords.longitude;
-	              
-   };
+	  
+	  callback();
+    }
+      
+  
 
    function onError(error) {
       alert('code: '    + error.code    + '\n' + 'message: ' + error.message + '\n');
    }
 }
 
-function watchPosition() {
+function watchPosition(callback) {
    var options = {
       maximumAge: 3600000,
       timeout: 3000,
@@ -140,10 +200,14 @@ function watchPosition() {
    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, options);
 
    function onSuccess(position) {
-      currentLat = position.coords.latitude;
-	  currentLon = position.coords.longitude;
-	  UpdateMinAndCurrentLocation()
-	  alert("lat=" + position.coords.heading);
+      //currentLat = position.coords.latitude;
+	  //currentLon = position.coords.longitude;
+	  currentLat = 43.642613;
+	  currentLon = -79.387059;
+	
+	  
+	  
+	  callback();
 	  
    };
 
@@ -151,54 +215,49 @@ function watchPosition() {
       alert('code: '    + error.code    + '\n' +'message: ' + error.message + '\n');
    }
 }
-function imgMouseDown()
-{
 
-	document.getElementById('arrow').width = ""+ (w*0.95);
-	document.getElementById('arrow').height = "" +(h*0.95);
-}
-function imgMouseUp()
-{
 
-	document.getElementById('arrow').width = ""+ (w);
-	document.getElementById('arrow').height = "" +(h);
-}
-function imgMouseOut()
-{
-	document.getElementById('arrow').width = ""+ (w);
-	document.getElementById('arrow').height = "" +(h);
-}
-	
-var currentLat = 0;
-var currentLon = 0;
-var minDist = 20;
-var closestLon = 0;
-var closestLat = 0 ;
-var closestDist = 0;
-var closestIndex = 0;
-var closesDescription = "";
-var nextDist=0;
-var nextHeading = 0;
-var list_of_dist = [];
-var w;
-var h;
 $(document).ready(function(){
-w = parseInt(document.getElementById('arrow').width);
-h = parseInt(document.getElementById('arrow').height); 
-document.getElementById('arrow').addEventListener('touchstart',imgMouseDown,false);	
-document.getElementById('arrow').addEventListener('touchend',imgMouseUp,false);	
-document.getElementById('arrow').addEventListener('touchcancel',imgMouseOut,false);	
- document.body.addEventListener('touchmove', function(e) {
-                    e.preventDefault();
-                }, false);
 
-//	watchPosition();
+localStorage.clear();
+$("#arrow").click(function(){
+	
+    localStorage.setItem("location1",43.642613+"/"+(-79.387059)+"/" + "CN tower");
+	setStorageLength(1);
+	
+	
+	
+	
+	localStorage.setItem("location2",43.743407+"/"+(-79.582001)+"/" + "kipling");
+	setStorageLength(2);
+	
+	v = $("#desBox").val();
+	alert(v);
+	//alert("storage was cleared and the length is" + localStorage.length);
+	//getPosition(saveLocation);
+	
+});
+$(function() {
+  $("#main").swipe( {
+    //Generic swipe handler for all directions
+    swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
+     if(direction=="up"){
+		window.location = "table.html"
+	 }
+	 
+    }
+  });
+});
+
+
+watchPosition(UpdateMinAndCurrentLocation);
 	
 function processEvent(event) {
-	var currentAngle = Math.round(event.alpha);
-	var Degree = (nextHeading-currentAngle-90)+"deg";
+	var currentAngle = Math.round(event.alpha)-180;
+	
+	var Degree = (currentAngle-90+nextHeading)+"deg";
 	$("#arrow").css("transform","rotate("+Degree+")");
-	$("h1").html(""+currentAngle);    
+	  
 };
 window.addEventListener("deviceorientation",processEvent, true);
 
