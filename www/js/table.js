@@ -38,9 +38,19 @@ function dist(coords1, coords2) {
 
   return d;
 }
-function addCell(table,location,description,distance){
-
-var cell1 = '<td>'+location+'</td>';	
+function cellClick(index)
+{
+	var a =localStorage.getItem("location"+(index+1)).split('/');
+	sessionStorage.setItem('nextLat', a[0] );
+	sessionStorage.setItem('nextLon', a[1] );
+	sessionStorage.setItem('nextDes', a[2] );
+	window.location = "index.html";
+	
+}
+function addCell(table,index,location,description,distance){
+var clicFunctionCall = "<button type=\"button\" class=\"block\" onclick=cellClick("+index+")> Location"+(index+1) +"</button>";
+var cell1 = '<td>'+clicFunctionCall+'</td>';
+	
 var cell2 = '<td>'+description+'</td>';	
 var cell3 = '<td>'+distance+'</td>';	
 table.insertAdjacentHTML('beforeend', '<tr>' +cell1 +cell2 +cell3+'</tr>');
@@ -98,7 +108,7 @@ function drawTable(){
 		var combined = localStorage.getItem("location"+(indices[i]+1));
 		var splited = combined.split("/");;
 		 
-		addCell(element,"Location"+(i+1),splited[2],list_of_dist[indices[i]]);
+		addCell(element,indices[i],"Location"+(i+1),splited[2],list_of_dist[indices[i]]);
 	}
 	
 }

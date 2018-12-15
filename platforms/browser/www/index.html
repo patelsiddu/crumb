@@ -39,10 +39,14 @@
     * Create your own at http://cspisawesome.com
     -->
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-	<link rel="stylesheet" type="text/css" href="css/crumb.css"
-	
 
 <title>Crumbz</title>
+
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+
+<script type="text/javascript" src="js/jquery.touchSwipe.min.js"></script>
+<script src="js/crumb.js"></script>
+<link rel="stylesheet" type="text/css" href="css/crumb.css"
 </head>
 
 <body>
@@ -54,13 +58,10 @@
 		<img id="arrow" src="img/arrow-button.png">
         </div>
 		<div>
-		<form>
-			
-			<input type="text" name="firstname">
-			<br>
-			
-			<input type="text" name="lastname">
-		</form>
+		
+  		<input id="desBox" type="text" name="firstname"><br>
+		
+		
 		</div>
     </div>
 	
@@ -69,10 +70,8 @@
     <script type="text/javascript">
         app.initialize();
     </script>
-	<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
-	<script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
-	<script type="text/javascript" src="js/jquery.touchSwipe.min.js"></script>
-	<script src="js/crumb.js"></script>
+
+	
 </body>
 
 </html>

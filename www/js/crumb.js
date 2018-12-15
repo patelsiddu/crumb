@@ -2,7 +2,7 @@ var currentLat = 0;
 var currentLon = 0;
 var minDist = 20;
 
-var nextDist=0;
+
 var nextHeading = 0;
 var list_of_dist = [];
 
@@ -103,11 +103,7 @@ function UpdateMinAndCurrentLocation(){
 			{
 				return list_of_dist[a] - list_of_dist[b] 
 			});
-				
-			
-			
-			
-			
+		
 			UpdateNextDestination(0);
 			
 		}
@@ -119,19 +115,26 @@ function UpdateNextDestination(index){
 	var temp_lat = 0;
 	var temp_lon = 0;
 	var temp_dist = 0;
+
 	if("nextLat" in sessionStorage){
-		temp_lat = parseFloat(SessionStorage.getItem("nextLat"));
-		temp_lat = parseFloat(SessionStorage.getItem("nextLon"));
-		nextHeading = bearing([currentLat,currentLon],[temp_Lat,temp_Lon]);
-		temp_dist =  dist([currentLat,currentLon],[temp_Lat,temp_Lon]);
+		
+		temp_lat = parseFloat(sessionStorage.getItem("nextLat"));
+		
+		temp_lon = parseFloat(sessionStorage.getItem("nextLon"));
+		nextHeading = bearing([currentLat,currentLon],[temp_lat,temp_lon]);
+		
+		
+		temp_dist =  dist([currentLat,currentLon],[temp_lat,temp_lon]);
+		
 		if (temp_dist<minDist){
 			$("#NextText").text("you have reached your destination");
 			sessionStorage.clear();
 		}else {
-			nextDist = temp_dist;
+		$("#NextText").html(sessionStorage.getItem("nextDes") +" at "+temp_dist+"m");
 		}
 	}else if(index<getStorageLength())
 	{	var a = localStorage.getItem("location"+(indices[index]+1));
+		
 		var splitedA = a.split("/");
 		if(list_of_dist[indices[index]]>minDist){
 			
@@ -160,13 +163,15 @@ function saveLocation(){
 	var lon = currentLon;
 	if (list_of_dist[indices[0]]>minDist || len==0)
 	{
-		localStorage.setItem("location"+(len+1),lat+"/"+lon+"/" + description);
+		localStorage.setItem("location"+(len+1),lat+"/"+lon+"/" + $("#desBox").val());
 		setStorageLength(len+1);
+		$("#curLocText").text("Current location saved");
 	}else
 	{
-				
-		localStorage.setItem("location"+(indices[0]+1),currentLat+"/"+currentLon+"/" + closesDescription);
+		localStorage.setItem("location"+(indices[0]+1),currentLat+"/"+currentLon+"/" + $("#desBox").val());
+		$("#curLocText").text("Current location saved");
 	}
+	
     
 }
 
@@ -178,10 +183,12 @@ function getPosition(callback) {
    var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
 
    function onSuccess(position) {
-      currentLat = position.coords.latitude;
-	  currentLon = position.coords.longitude;
-	  
+      //currentLat = position.coords.latitude;
+	  //currentLon = position.coords.longitude;
+	  currentLat = 43.642613;
+	  currentLon = -79.387059;
 	  callback();
+	
     }
       
   
@@ -221,20 +228,9 @@ $(document).ready(function(){
 
 localStorage.clear();
 $("#arrow").click(function(){
+
 	
-    localStorage.setItem("location1",43.642613+"/"+(-79.387059)+"/" + "CN tower");
-	setStorageLength(1);
-	
-	
-	
-	
-	localStorage.setItem("location2",43.743407+"/"+(-79.582001)+"/" + "kipling");
-	setStorageLength(2);
-	
-	v = $("#desBox").val();
-	alert(v);
-	//alert("storage was cleared and the length is" + localStorage.length);
-	//getPosition(saveLocation);
+	getPosition(saveLocation);
 	
 });
 $(function() {
@@ -257,7 +253,7 @@ function processEvent(event) {
 	
 	var Degree = (currentAngle-90+nextHeading)+"deg";
 	$("#arrow").css("transform","rotate("+Degree+")");
-	  
+	
 };
 window.addEventListener("deviceorientation",processEvent, true);
 
