@@ -245,7 +245,7 @@ watchPosition(UpdateMinAndCurrentLocation);
 function processEvent(event) {
 	
 	var currentAngle = 360 - Math.round(event.alpha);
-	$("#curLocText").text(""+currentAngle);
+	
 	var Degree = (currentAngle-90+nextHeading)+"deg";
 	$("#arrow").css("transform","rotate("+Degree+")");
 	
