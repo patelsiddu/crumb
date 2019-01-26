@@ -243,13 +243,14 @@ $(function() {
 watchPosition(UpdateMinAndCurrentLocation);
 	
 function processEvent(event) {
-	var currentAngle = Math.round(event.alpha)-180;
 	
+	var currentAngle = 360 - Math.round(event.alpha);
+	$("#curLocText").text(""+currentAngle);
 	var Degree = (currentAngle-90+nextHeading)+"deg";
 	$("#arrow").css("transform","rotate("+Degree+")");
 	
 };
-window.addEventListener("deviceorientation",processEvent, true);
+window.addEventListener("deviceorientationabsolute",processEvent, true);
 
 
 

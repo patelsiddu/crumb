@@ -44,6 +44,7 @@ function cellClick(index)
 	sessionStorage.setItem('nextLat', a[0] );
 	sessionStorage.setItem('nextLon', a[1] );
 	sessionStorage.setItem('nextDes', a[2] );
+	
 	window.location = "index.html";
 	
 }
@@ -114,6 +115,7 @@ function drawTable(){
 }
 
 $(document).ready(function(){
+	sessionStorage.clear();
 	getPosition(drawTable);
 	
 });

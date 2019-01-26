@@ -115,7 +115,7 @@ function UpdateNextDestination(index){
 	var temp_lat = 0;
 	var temp_lon = 0;
 	var temp_dist = 0;
-
+    
 	if("nextLat" in sessionStorage){
 		
 		temp_lat = parseFloat(sessionStorage.getItem("nextLat"));
@@ -144,7 +144,6 @@ function UpdateNextDestination(index){
 			
 			$("#NextText").html(splitedA[2] +" at "+list_of_dist[index]+"m");
 		}else{
-			
 			$("#curLocText").text("You are at:" + splitedA[2]);
 			UpdateNextDestination(index+1)
 		}
@@ -183,10 +182,9 @@ function getPosition(callback) {
    var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
 
    function onSuccess(position) {
-      //currentLat = position.coords.latitude;
-	  //currentLon = position.coords.longitude;
-	  currentLat = 43.642613;
-	  currentLon = -79.387059;
+      currentLat = position.coords.latitude;
+	  currentLon = position.coords.longitude;
+	
 	  callback();
 	
     }
@@ -207,13 +205,9 @@ function watchPosition(callback) {
    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, options);
 
    function onSuccess(position) {
-      //currentLat = position.coords.latitude;
-	  //currentLon = position.coords.longitude;
-	  currentLat = 43.642613;
-	  currentLon = -79.387059;
-	
-	  
-	  
+      currentLat = position.coords.latitude;
+	  currentLon = position.coords.longitude;
+
 	  callback();
 	  
    };
@@ -226,7 +220,7 @@ function watchPosition(callback) {
 
 $(document).ready(function(){
 
-localStorage.clear();
+
 $("#arrow").click(function(){
 
 	
@@ -249,13 +243,14 @@ $(function() {
 watchPosition(UpdateMinAndCurrentLocation);
 	
 function processEvent(event) {
-	var currentAngle = Math.round(event.alpha)-180;
 	
+	var currentAngle = 360 - Math.round(event.alpha);
+	$("#curLocText").text(""+currentAngle);
 	var Degree = (currentAngle-90+nextHeading)+"deg";
 	$("#arrow").css("transform","rotate("+Degree+")");
 	
 };
-window.addEventListener("deviceorientation",processEvent, true);
+window.addEventListener("deviceorientationabsolute",processEvent, true);
 
 
 
